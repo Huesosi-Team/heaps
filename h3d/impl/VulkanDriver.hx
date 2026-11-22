@@ -2104,6 +2104,9 @@ class VulkanDriver extends h3d.impl.Driver {
 	// ---- SHADERS
 
 	static function getPushOffset( sh : hxsl.RuntimeShader.RuntimeShaderData ) {
+		var driver : VulkanDriver = Std.downcast(Engine.getCurrent()?.driver, VulkanDriver);
+		if( driver != null && !driver.usePushConstants )
+			return -1;
 		var size = sh.paramsSize << 4;
 		if( size == 0 || size > PUSH_HALF )
 			return -1;
