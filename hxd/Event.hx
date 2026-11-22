@@ -38,6 +38,7 @@ class Event {
 	public var keyCode : Int;
 	public var charCode : Int;
 	public var wheelDelta : Float;
+	public var wheelDeltaX : Float = 0;
 
 	public function new(k,x=0.,y=0.) {
 		kind = k;
