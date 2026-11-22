@@ -400,6 +400,7 @@ class VulkanDriver extends h3d.impl.Driver {
 	var memBudgets = haxe.io.Bytes.alloc(MemoryReport.MAX_HEAPS * MemoryReport.BUDGET_STRIDE);
 
 	var useBindless = false;
+	var usePushConstants = true;
 	var bindlessLayout : DescriptorSetLayout;
 	var bindlessPool : DescriptorPool;
 	var bindlessTextures : BindlessIndices;
@@ -479,8 +480,7 @@ class VulkanDriver extends h3d.impl.Driver {
 		createDevice();
 		upscaling.afterCreateDevice();
 		upscaling.afterCreateQueue();
-		if( limits.maxPushConstantsSize < PUSH_HALF << 1 )
-			throw "Vulkan device supports only " + limits.maxPushConstantsSize + " bytes of push constants, " + (PUSH_HALF << 1) + " required";
+		usePushConstants = limits.maxPushConstantsSize >= (PUSH_HALF << 1);
 		uniformAlign = hxd.Math.imax(limits.minUniformBufferOffsetAlignment.toInt(), 16);
 		uniformAlign = hxd.Math.imax(uniformAlign, limits.minStorageBufferOffsetAlignment.toInt());
 		copyAlign = hxd.Math.imax(limits.optimalBufferCopyOffsetAlignment.toInt(), 16);
