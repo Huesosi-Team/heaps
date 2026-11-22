@@ -116,6 +116,7 @@ class Window {
 		var sdlFlags = 0;
 		if (!fixed) sdlFlags |= sdl.Window.SDL_WINDOW_RESIZABLE;
 		if (!hidden) sdlFlags |= sdl.Window.SDL_WINDOW_SHOWN;
+		sdl.Sdl.setLiveResizeCallback(onLiveRefresh);
 		#if hlvk
 		sdlFlags |= sdl.Window.SDL_WINDOW_VULKAN;
 		#end
@@ -149,6 +150,9 @@ class Window {
 	public function close() {
 		if( !WINDOWS.remove(this) )
 			return;
+		#if hlsdl
+		sdl.Sdl.setLiveResizeCallback(null);
+		#end
 		#if (multidriver && (hlsdl || hldx))
 		window.destroy();
 		#end
@@ -159,8 +163,11 @@ class Window {
 			et(e);
 	}
 
-	public function addEventTarget(et : Event -> Void) : Void {
-		eventTargets.add(et);
+	public function addEventTarget(et : Event -> Void, prepend : Bool = false) : Void {
+		if (prepend)
+			eventTargets.push(et);
+		else
+			eventTargets.add(et);
 	}
 
 	public function removeEventTarget(et : Event -> Void) : Void {
@@ -201,7 +208,13 @@ class Window {
 			}
 			#end
 		}
+		#if hlsdl
+		inProgrammaticResize = true;
+		#end
 		window.resize(width, height);
+		#if hlsdl
+		inProgrammaticResize = false;
+		#end
 		#end
 		windowWidth = width;
 		windowHeight = height;
@@ -502,6 +515,7 @@ class Window {
 		case MouseWheel:
 			eh = new Event(EWheel, mouseX, mouseY);
 			eh.wheelDelta = -e.wheelDelta;
+			#if hlsdl eh.wheelDeltaX = e.wheelDeltaX; #end
 		#if hlsdl
 		case GControllerAdded, GControllerRemoved, GControllerUp, GControllerDown, GControllerAxis:
 			@:privateAccess hxd.Pad.onEvent( e );
@@ -614,6 +628,31 @@ class Window {
 			close();
 		return ret;
 	}
+
+	#if hlsdl
+	var isLiveRefreshing = false;
+	var inProgrammaticResize = false;
+	var lastLiveTick = 0.0;
+
+	function onLiveRefresh() : Void {
+		if (isLiveRefreshing || inProgrammaticResize || window == null) return;
+		isLiveRefreshing = true;
+
+		if (window.width != windowWidth || window.height != windowHeight) {
+			windowWidth = window.width;
+			windowHeight = window.height;
+			onResize(null);
+		}
+
+		var now = haxe.Timer.stamp();
+		if (now - lastLiveTick >= 0.014) {
+			lastLiveTick = now;
+			@:privateAccess hxd.System.mainLoop();
+		}
+
+		isLiveRefreshing = false;
+	}
+	#end
 
 	static function initChars() : Void {
 
