@@ -159,8 +159,11 @@ class Window {
 	}
 
 	public function event( e : hxd.Event ) : Void {
-		for( et in eventTargets )
+		for( et in eventTargets ) {
 			et(e);
+			if( e.cancel )
+				break;
+		}
 	}
 
 	public function addEventTarget(et : Event -> Void, prepend : Bool = false) : Void {

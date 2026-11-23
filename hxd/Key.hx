@@ -184,6 +184,8 @@ class Key {
 	**/
 	public static var ALLOW_KEY_REPEAT = false;
 
+	public static var preventDefaultKeys : Array<Int> = [];
+
 	public static function isDown( code : Int ) {
 		return keyPressed[code] > 0;
 	}
@@ -219,9 +221,11 @@ class Key {
 	static function onEvent( e : Event ) {
 		switch( e.kind ) {
 		case EKeyDown:
+			if( preventDefaultKeys.indexOf(e.keyCode) >= 0 ) return;
 			if( !ALLOW_KEY_REPEAT && keyPressed[e.keyCode] > 0 ) return;
 			keyPressed[e.keyCode] = getFrame();
 		case EKeyUp:
+			if( preventDefaultKeys.indexOf(e.keyCode) >= 0 ) return;
 			keyPressed[e.keyCode] = -getFrame();
 		case EPush:
 			if( e.button < 5 ) keyPressed[e.button] = getFrame();
