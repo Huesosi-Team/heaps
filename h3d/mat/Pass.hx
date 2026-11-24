@@ -140,6 +140,11 @@ class Pass {
 			blend(One, One);
 			blendAlphaOp = Min;
 			blendOp = Min;
+		case EraseAlpha: // Out = 0 * Src + (1 - SrcA) * Dst
+			blend(Zero, OneMinusSrcAlpha);
+		case Invert: // Out = (1 - Dst) * Src + (1 - SrcA) * Dst
+			blend(OneMinusDstColor, OneMinusSrcAlpha);
+			blendAlphaSrc = One;
 		}
 	}
 

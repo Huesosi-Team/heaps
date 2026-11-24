@@ -56,4 +56,12 @@ enum BlendMode {
 		`Out = MAX( Src, Dst )`
 	**/
 	Min;
+	/**
+		`Out = 0 * Src + (1 - SrcA) * Dst`
+	**/
+	EraseAlpha;
+	/**
+		`Out = (1 - Dst) * Src + (1 - SrcA) * Dst`
+	**/
+	Invert;
 }
